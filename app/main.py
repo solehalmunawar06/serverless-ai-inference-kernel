@@ -49,3 +49,12 @@ def health():
 @app.post("/inference", response_model=InferenceResponse)
 def inference(request: InferenceRequest):
     return execution_kernel.execute(request.function, request.input)
+
+@app.get("/executions")
+def executions():
+    history = execution_kernel.get_history()
+
+    return {
+        "total": len(history),
+        "executions": history,
+    }
