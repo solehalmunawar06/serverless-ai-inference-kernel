@@ -5,6 +5,9 @@ import time
 import uuid
 
 from models.registry import AI_FUNCTIONS
+from models.execution import ExecutionKernel
+
+execution_kernel = ExecutionKernel(AI_FUNCTIONS)
 
 
 app = FastAPI(
@@ -45,30 +48,4 @@ def health():
 
 @app.post("/inference", response_model=InferenceResponse)
 def inference(request: InferenceRequest):
-
-    execution_id = str(uuid.uuid4())
-
-    start_time = time.perf_counter()
-
-    ai_function = AI_FUNCTIONS.get(request.function)
-
-    if ai_function is None:
-        return {
-            "execution_id": execution_id,
-            "function": request.function,
-            "result": f"Function '{request.function}' not found",
-            "execution_time_ms": 0,
-            "status": "error"
-        }
-
-    result = ai_function(request.input)
-
-    execution_time = (time.perf_counter() - start_time) * 1000
-
-    return {
-        "execution_id": execution_id,
-        "function": request.function,
-        "result": result,
-        "execution_time_ms": round(execution_time, 3),
-        "status": "completed"
-    }
+    return execution_kernel.execute(request.function, request.input)
