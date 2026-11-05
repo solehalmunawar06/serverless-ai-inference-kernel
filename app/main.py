@@ -6,8 +6,10 @@ import uuid
 
 from models.registry import AI_FUNCTIONS
 from models.execution import ExecutionKernel
+from models.wasm_functions import WASM_FUNCTIONS
 
-execution_kernel = ExecutionKernel(AI_FUNCTIONS)
+ALL_FUNCTIONS = {**AI_FUNCTIONS, **WASM_FUNCTIONS}
+execution_kernel = ExecutionKernel(ALL_FUNCTIONS)
 
 
 app = FastAPI(
