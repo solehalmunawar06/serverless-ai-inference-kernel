@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serverless AI Inference Kernel</title>
+    <title>Serverless AI Inference Execution Kernel</title>
 
     <style>
         * {
@@ -13,19 +13,35 @@
         body {
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
-            background: #f4f6f8;
-            color: #17202a;
+            background: #f1f5f9;
+            color: #0f172a;
         }
 
         .header {
-            background: #111827;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
             color: white;
-            padding: 28px 40px;
+            padding: 30px 40px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .header-content {
+            max-width: 1250px;
+            margin: auto;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #1d4ed8;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 12px;
         }
 
         .header h1 {
             margin: 0 0 8px;
-            font-size: 28px;
+            font-size: 30px;
         }
 
         .header p {
@@ -34,20 +50,48 @@
         }
 
         .container {
-            max-width: 1200px;
-            margin: 30px auto;
+            max-width: 1250px;
+            margin: 28px auto;
             padding: 0 20px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            font-size: 25px;
+            font-weight: bold;
+            margin-top: 7px;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
+            grid-template-columns: 1.05fr 0.95fr;
             gap: 20px;
         }
 
         .card {
             background: white;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #e2e8f0;
             border-radius: 14px;
             padding: 24px;
             box-shadow: 0 4px 14px rgba(0,0,0,0.05);
@@ -55,13 +99,19 @@
 
         .card h2 {
             margin-top: 0;
-            font-size: 20px;
+            font-size: 19px;
+        }
+
+        .card h3 {
+            font-size: 15px;
+            margin-top: 24px;
         }
 
         label {
             display: block;
             font-weight: bold;
             margin: 14px 0 7px;
+            font-size: 13px;
         }
 
         select,
@@ -72,14 +122,21 @@
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-size: 14px;
+            outline: none;
+        }
+
+        select:focus,
+        input:focus,
+        textarea:focus {
+            border-color: #2563eb;
         }
 
         textarea {
-            min-height: 120px;
+            min-height: 110px;
             resize: vertical;
         }
 
-        .iris-grid {
+        .input-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
@@ -102,91 +159,197 @@
             background: #1d4ed8;
         }
 
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
         .result {
             margin-top: 18px;
-            background: #f8fafc;
+            background: #0f172a;
+            color: #e2e8f0;
             border-radius: 10px;
             padding: 16px;
             min-height: 100px;
             white-space: pre-wrap;
             font-family: Consolas, monospace;
             font-size: 13px;
+            overflow-x: auto;
         }
 
         .status {
             display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
+            padding: 5px 11px;
+            border-radius: 999px;
             background: #dcfce7;
             color: #166534;
             font-size: 12px;
             font-weight: bold;
         }
 
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status.running {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+            padding: 12px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .info-value {
+            margin-top: 5px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
         .lifecycle {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-top: 20px;
+            gap: 7px;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
 
         .step {
-            padding: 9px 13px;
-            background: #eef2ff;
+            padding: 9px 12px;
+            background: #e2e8f0;
+            color: #475569;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
         }
 
+        .step.active {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .step.done {
+            background: #dcfce7;
+            color: #166534;
+        }
+
         .arrow {
-            color: #64748b;
+            color: #94a3b8;
+            font-weight: bold;
+        }
+
+        .architecture-box {
+            background: #0f172a;
+            color: #cbd5e1;
+            padding: 18px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            line-height: 1.8;
+            overflow-x: auto;
+            font-size: 13px;
+        }
+
+        .architecture-box .highlight {
+            color: #60a5fa;
         }
 
         .history {
             margin-top: 20px;
         }
 
-        .history-item {
-            border-top: 1px solid #e5e7eb;
-            padding: 14px 0;
-            font-size: 13px;
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .history-item strong {
-            display: inline-block;
-            min-width: 90px;
+        .history-item {
+            border-top: 1px solid #e2e8f0;
+            padding: 15px 0;
+        }
+
+        .history-main {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .history-function {
+            font-weight: bold;
+        }
+
+        .history-meta {
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .mini-status {
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 11px;
+            font-weight: bold;
         }
 
         .hidden {
             display: none;
         }
 
-        .architecture {
-            margin-top: 20px;
+        .footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            padding: 25px 0;
         }
 
-        .architecture-box {
-            background: #111827;
-            color: white;
-            padding: 18px;
-            border-radius: 10px;
-            font-family: Consolas, monospace;
-            line-height: 1.8;
-            overflow-x: auto;
-        }
-
-        @media (max-width: 800px) {
+        @media (max-width: 850px) {
             .grid {
                 grid-template-columns: 1fr;
             }
 
-            .iris-grid {
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .input-grid,
+            .info-grid {
                 grid-template-columns: 1fr;
             }
 
             .header {
-                padding: 22px;
+                padding: 25px 20px;
+            }
+
+            .header h1 {
+                font-size: 23px;
             }
         }
     </style>
@@ -195,17 +358,46 @@
 <body>
 
 <header class="header">
-    <h1>Serverless AI Inference Execution Kernel</h1>
-    <p>Application-level OS architecture for fast and isolated AI inference execution</p>
+    <div class="header-content">
+        <div class="badge">APPLICATION-LEVEL OS</div>
+        <h1>Serverless AI Inference Execution Kernel</h1>
+        <p>
+            Fast, isolated and lifecycle-aware execution of AI inference functions
+            using WebAssembly Runtime and Process Sandbox.
+        </p>
+    </div>
 </header>
 
 <main class="container">
+
+    <!-- STATISTICS -->
+    <section class="stats">
+        <div class="stat">
+            <div class="stat-label">Total Executions</div>
+            <div class="stat-value" id="totalExecutions">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value" id="completedExecutions">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Errors</div>
+            <div class="stat-value" id="errorExecutions">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Average Time</div>
+            <div class="stat-value" id="averageTime">0 ms</div>
+        </div>
+    </section>
 
     <div class="grid">
 
         <!-- INFERENCE CONSOLE -->
         <section class="card">
-            <h2>Inference Console</h2>
+            <h2>⚡ Inference Console</h2>
 
             <label for="function">Inference Function</label>
 
@@ -218,13 +410,14 @@
 
             <div id="normalInput">
                 <label for="input">Input</label>
-                <textarea id="input" placeholder="Masukkan input..."></textarea>
+                <textarea id="input"
+                    placeholder="Masukkan input inference..."></textarea>
             </div>
 
             <div id="addInput" class="hidden">
                 <label>WASM Addition</label>
 
-                <div class="iris-grid">
+                <div class="input-grid">
                     <div>
                         <label for="a">A</label>
                         <input id="a" type="number" value="10">
@@ -240,37 +433,39 @@
             <div id="irisInput" class="hidden">
                 <label>Iris Measurements</label>
 
-                <div class="iris-grid">
-
+                <div class="input-grid">
                     <div>
                         <label for="sepal_length">Sepal Length</label>
-                        <input id="sepal_length" type="number" step="0.1" value="5.1">
+                        <input id="sepal_length" type="number"
+                            step="0.1" value="5.1">
                     </div>
 
                     <div>
                         <label for="sepal_width">Sepal Width</label>
-                        <input id="sepal_width" type="number" step="0.1" value="3.5">
+                        <input id="sepal_width" type="number"
+                            step="0.1" value="3.5">
                     </div>
 
                     <div>
                         <label for="petal_length">Petal Length</label>
-                        <input id="petal_length" type="number" step="0.1" value="1.4">
+                        <input id="petal_length" type="number"
+                            step="0.1" value="1.4">
                     </div>
 
                     <div>
                         <label for="petal_width">Petal Width</label>
-                        <input id="petal_width" type="number" step="0.1" value="0.2">
+                        <input id="petal_width" type="number"
+                            step="0.1" value="0.2">
                     </div>
-
                 </div>
             </div>
 
-            <button onclick="executeInference()">
+            <button id="executeButton" onclick="executeInference()">
                 ⚡ Execute Inference
             </button>
 
             <div id="result" class="result">
-                Belum ada inference.
+Belum ada inference.
             </div>
         </section>
 
@@ -278,47 +473,82 @@
         <!-- EXECUTION STATUS -->
         <section class="card">
 
-            <h2>Execution Status</h2>
+            <h2>🔧 Execution Status</h2>
 
             <p>
                 Status:
                 <span id="status" class="status">READY</span>
             </p>
 
-            <div id="executionInfo">
-                <p>Execution ID: -</p>
-                <p>Runtime: -</p>
-                <p>Execution Time: -</p>
+            <div class="info-grid">
+
+                <div class="info">
+                    <div class="info-label">Execution ID</div>
+                    <div class="info-value" id="executionId">-</div>
+                </div>
+
+                <div class="info">
+                    <div class="info-label">Function</div>
+                    <div class="info-value" id="executionFunction">-</div>
+                </div>
+
+                <div class="info">
+                    <div class="info-label">Runtime</div>
+                    <div class="info-value" id="runtime">-</div>
+                </div>
+
+                <div class="info">
+                    <div class="info-label">Execution Time</div>
+                    <div class="info-value" id="executionTime">-</div>
+                </div>
+
+                <div class="info">
+                    <div class="info-label">Sandbox</div>
+                    <div class="info-value" id="sandbox">-</div>
+                </div>
+
+                <div class="info">
+                    <div class="info-label">Process ID</div>
+                    <div class="info-value" id="pid">-</div>
+                </div>
+
             </div>
 
             <h3>Lifecycle</h3>
 
             <div class="lifecycle">
-                <div class="step">Load</div>
+                <div id="stepCreate" class="step">CREATE</div>
                 <div class="arrow">→</div>
-                <div class="step">Execute</div>
+                <div id="stepExecute" class="step">EXECUTE</div>
                 <div class="arrow">→</div>
-                <div class="step">Terminate</div>
+                <div id="stepReturn" class="step">RETURN</div>
+                <div class="arrow">→</div>
+                <div id="stepTerminate" class="step">TERMINATE</div>
             </div>
 
-            <div class="architecture">
-                <h3>Runtime Architecture</h3>
+            <h3>Runtime Architecture</h3>
 
-                <div class="architecture-box">
-USER
+            <div class="architecture-box">
+Browser
   ↓
-WEB UI
+<span class="highlight">Web UI</span>
   ↓
-FastAPI
+FastAPI API Gateway
   ↓
-Execution Kernel
+<span class="highlight">Execution Kernel</span>
+  ├─ Registry
+  ├─ Lifecycle Manager
+  └─ Resource Manager
   ↓
-Wasmtime
+<span class="highlight">Process Sandbox</span>
+  ↓
+Wasmtime Runtime
   ↓
 WASM Module
   ↓
 AI Inference
-                </div>
+  ↓
+Result + Metrics
             </div>
 
         </section>
@@ -329,13 +559,20 @@ AI Inference
     <!-- HISTORY -->
     <section class="card history">
 
-        <h2>Execution History</h2>
+        <div class="history-header">
+            <h2>📜 Execution History</h2>
+            <span id="historyCount">0 executions</span>
+        </div>
 
         <div id="history">
             Belum ada execution history.
         </div>
 
     </section>
+
+    <div class="footer">
+        Serverless AI Inference Execution Kernel • Infrastructure & Virtualization AI
+    </div>
 
 </main>
 
@@ -344,25 +581,110 @@ AI Inference
 
 function changeFunction() {
 
-    const selected = document.getElementById("function").value;
+    const selected =
+        document.getElementById("function").value;
 
-    document.getElementById("normalInput").classList.add("hidden");
-    document.getElementById("addInput").classList.add("hidden");
-    document.getElementById("irisInput").classList.add("hidden");
+    document.getElementById("normalInput")
+        .classList.add("hidden");
+
+    document.getElementById("addInput")
+        .classList.add("hidden");
+
+    document.getElementById("irisInput")
+        .classList.add("hidden");
 
     if (selected === "wasm_add") {
-        document.getElementById("addInput").classList.remove("hidden");
+
+        document.getElementById("addInput")
+            .classList.remove("hidden");
+
+    } else if (selected === "iris") {
+
+        document.getElementById("irisInput")
+            .classList.remove("hidden");
+
+    } else {
+
+        document.getElementById("normalInput")
+            .classList.remove("hidden");
     }
-    else if (selected === "iris") {
-        document.getElementById("irisInput").classList.remove("hidden");
+}
+
+
+function resetLifecycle() {
+
+    const steps = [
+        "stepCreate",
+        "stepExecute",
+        "stepReturn",
+        "stepTerminate"
+    ];
+
+    steps.forEach(id => {
+
+        document.getElementById(id)
+            .classList.remove("active", "done");
+
+    });
+}
+
+
+function showLifecycle(lifecycle) {
+
+    resetLifecycle();
+
+    if (!lifecycle) {
+        return;
     }
-    else {
-        document.getElementById("normalInput").classList.remove("hidden");
+
+    const text = lifecycle.toLowerCase();
+
+    const mapping = [
+        ["stepCreate", "create"],
+        ["stepExecute", "execute"],
+        ["stepReturn", "return"],
+        ["stepTerminate", "terminate"]
+    ];
+
+    mapping.forEach(([id, keyword]) => {
+
+        if (text.includes(keyword)) {
+
+            document.getElementById(id)
+                .classList.add("done");
+
+        }
+    });
+}
+
+
+function setStatus(status) {
+
+    const element =
+        document.getElementById("status");
+
+    element.className = "status";
+
+    const value =
+        String(status || "READY").toUpperCase();
+
+    element.textContent = value;
+
+    if (value === "ERROR") {
+
+        element.classList.add("error");
+
+    } else if (value === "EXECUTING...") {
+
+        element.classList.add("running");
     }
 }
 
 
 async function executeInference() {
+
+    const button =
+        document.getElementById("executeButton");
 
     const functionName =
         document.getElementById("function").value;
@@ -376,8 +698,7 @@ async function executeInference() {
             b: Number(document.getElementById("b").value)
         };
 
-    }
-    else if (functionName === "iris") {
+    } else if (functionName === "iris") {
 
         input = {
             sepal_length:
@@ -393,63 +714,102 @@ async function executeInference() {
                 Number(document.getElementById("petal_width").value)
         };
 
-    }
-    else {
+    } else {
 
         input =
             document.getElementById("input").value;
     }
 
 
-    document.getElementById("status").textContent =
-        "EXECUTING...";
+    button.disabled = true;
+    button.textContent = "⏳ Executing...";
+
+    setStatus("EXECUTING...");
+    resetLifecycle();
+
+    document.getElementById("result").textContent =
+        "Kernel is executing function...";
+
 
     try {
 
-        const response = await fetch("/inference", {
+        const response =
+            await fetch("/inference", {
 
-            method: "POST",
+                method: "POST",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-            body: JSON.stringify({
-                function: functionName,
-                input: input
-            })
-
-        });
-
-
-        const data = await response.json();
-
-        document.getElementById("status").textContent =
-            data.status.toUpperCase();
+                body: JSON.stringify({
+                    function: functionName,
+                    input: input
+                })
+            });
 
 
-        document.getElementById("executionInfo").innerHTML = `
-            <p>Execution ID: ${data.execution_id}</p>
-            <p>Runtime: ${data.runtime || "-"}</p>
-            <p>Execution Time: ${data.execution_time_ms} ms</p>
-        `;
+        const data =
+            await response.json();
 
 
-        document.getElementById("result").textContent =
-            JSON.stringify(data.result, null, 2);
+        if (!response.ok) {
+            throw new Error(
+                data.detail || "Inference request failed"
+            );
+        }
 
 
-        loadHistory();
+        setStatus(data.status);
+
+
+        document.getElementById("executionId")
+            .textContent = data.execution_id || "-";
+
+        document.getElementById("executionFunction")
+            .textContent = data.function || functionName;
+
+        document.getElementById("runtime")
+            .textContent = data.runtime || "-";
+
+        document.getElementById("executionTime")
+            .textContent =
+                data.execution_time_ms !== undefined
+                    ? data.execution_time_ms + " ms"
+                    : "-";
+
+        document.getElementById("sandbox")
+            .textContent = data.sandbox || "none";
+
+        document.getElementById("pid")
+            .textContent = data.pid || "-";
+
+
+        document.getElementById("result")
+            .textContent =
+                JSON.stringify(data.result, null, 2);
+
+
+        showLifecycle(data.lifecycle);
+
+
+        await loadHistory();
 
     }
+
     catch (error) {
 
-        document.getElementById("status").textContent =
-            "ERROR";
+        setStatus("ERROR");
 
-        document.getElementById("result").textContent =
-            error.toString();
+        document.getElementById("result")
+            .textContent = error.toString();
 
+    }
+
+    finally {
+
+        button.disabled = false;
+        button.textContent = "⚡ Execute Inference";
     }
 }
 
@@ -464,10 +824,57 @@ async function loadHistory() {
         const data =
             await response.json();
 
+        const executions =
+            data.executions || [];
+
+        document.getElementById("historyCount")
+            .textContent =
+                executions.length + " executions";
+
+
+        const total =
+            executions.length;
+
+        const completed =
+            executions.filter(
+                item => item.status === "completed"
+            ).length;
+
+        const errors =
+            executions.filter(
+                item => item.status === "error"
+            ).length;
+
+        const times =
+            executions
+                .map(item => Number(item.execution_time_ms))
+                .filter(value => !isNaN(value));
+
+        const average =
+            times.length
+                ? times.reduce((a, b) => a + b, 0) / times.length
+                : 0;
+
+
+        document.getElementById("totalExecutions")
+            .textContent = total;
+
+        document.getElementById("completedExecutions")
+            .textContent = completed;
+
+        document.getElementById("errorExecutions")
+            .textContent = errors;
+
+        document.getElementById("averageTime")
+            .textContent =
+                average.toFixed(2) + " ms";
+
+
         const history =
             document.getElementById("history");
 
-        if (!data.executions.length) {
+
+        if (!executions.length) {
 
             history.textContent =
                 "Belum ada execution history.";
@@ -477,51 +884,64 @@ async function loadHistory() {
 
 
         history.innerHTML =
-            data.executions
+            executions
                 .slice()
                 .reverse()
-                .map(item => `
+                .map(item => {
 
-                    <div class="history-item">
+                    const status =
+                        String(item.status || "unknown");
 
-                        <div>
-                            <strong>Function:</strong>
-                            ${item.function}
+                    return `
+                        <div class="history-item">
+
+                            <div class="history-main">
+
+                                <div>
+                                    <div class="history-function">
+                                        ${item.function || "-"}
+                                    </div>
+
+                                    <div class="history-meta">
+                                        Runtime:
+                                        ${item.runtime || "-"}
+                                        &nbsp; • &nbsp;
+
+                                        Time:
+                                        ${item.execution_time_ms ?? "-"} ms
+
+                                        &nbsp; • &nbsp;
+
+                                        Sandbox:
+                                        ${item.sandbox || "none"}
+                                    </div>
+                                </div>
+
+                                <span class="mini-status">
+                                    ${status.toUpperCase()}
+                                </span>
+
+                            </div>
+
+                            <div class="history-meta">
+                                ID: ${item.execution_id || "-"}
+                                ${item.pid ? ` • PID: ${item.pid}` : ""}
+                            </div>
+
                         </div>
+                    `;
 
-                        <div>
-                            <strong>Status:</strong>
-                            ${item.status}
-                        </div>
-
-                        <div>
-                            <strong>Runtime:</strong>
-                            ${item.runtime || "-"}
-                        </div>
-
-                        <div>
-                            <strong>Time:</strong>
-                            ${item.execution_time_ms} ms
-                        </div>
-
-                        <div>
-                            <strong>ID:</strong>
-                            ${item.execution_id}
-                        </div>
-
-                    </div>
-
-                `)
+                })
                 .join("");
 
     }
+
     catch (error) {
 
         console.error(
             "History error:",
             error
         );
-
     }
 }
 
