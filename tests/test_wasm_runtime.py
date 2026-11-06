@@ -6,4 +6,5 @@ def test_wasm_runtime_add():
 
     result = runtime.execute("add", 10, 20)
 
-    assert result == 30
+    assert result["result"] == 30
+    assert result["execution_time_ms"] >= 0

@@ -11,7 +11,7 @@ from models.execution import ExecutionKernel
 from models.wasm_functions import WASM_FUNCTIONS
 
 ALL_FUNCTIONS = {**AI_FUNCTIONS, **WASM_FUNCTIONS}
-execution_kernel = ExecutionKernel(ALL_FUNCTIONS)
+execution_kernel = ExecutionKernel(ALL_FUNCTIONS, wasm_function_names=set(WASM_FUNCTIONS.keys()))
 
 
 app = FastAPI(
@@ -36,6 +36,10 @@ class InferenceResponse(BaseModel):
     result: Any
     execution_time_ms: float
     status: str
+    runtime: str | None = None
+    sandbox: str | None = None
+    pid: int | None = None
+    lifecycle: str | None = None
 
 
 @app.get("/", include_in_schema=False)
