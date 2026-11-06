@@ -37,7 +37,7 @@ def root():
     return {
         "system": "Serverless AI Inference Execution Kernel",
         "status": "running",
-        "available_functions": list(AI_FUNCTIONS.keys())
+        "available_functions": list(ALL_FUNCTIONS.keys())
     }
 
 
