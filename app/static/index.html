@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serverless AI Inference Kernel</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f8;
+            color: #1f2937;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        select,
+        textarea,
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            margin-bottom: 15px;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .result {
+            background: #111827;
+            color: #e5e7eb;
+            padding: 15px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            min-height: 100px;
+        }
+
+        .history-item {
+            border-left: 4px solid #2563eb;
+            background: #f9fafb;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+        }
+
+        .status {
+            font-weight: bold;
+        }
+
+        .completed {
+            color: #16a34a;
+        }
+
+        .error {
+            color: #dc2626;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Serverless AI Inference Execution Kernel</h1>
+
+    <p class="subtitle">
+        Application-level OS kernel for fast AI inference execution
+    </p>
+
+    <div class="card">
+
+        <h2>AI Inference</h2>
+
+        <br>
+
+        <label for="function">Pilih Function</label>
+
+        <select id="function">
+            <option value="echo">Echo</option>
+            <option value="uppercase">Uppercase</option>
+            <option value="wasm_add">WASM Add</option>
+        </select>
+
+        <label for="input">Input</label>
+
+        <textarea id="input">Halo Serverless AI</textarea>
+
+        <button onclick="executeInference()">
+            Execute Inference
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Execution Result</h2>
+
+        <br>
+
+        <div id="result" class="result">
+            Belum ada execution.
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Execution History</h2>
+
+        <br>
+
+        <div id="history">
+            Belum ada history.
+        </div>
+
+        <button onclick="loadHistory()">
+            Refresh History
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+async function executeInference() {
+
+    const functionName =
+        document.getElementById("function").value;
+
+    const inputText =
+        document.getElementById("input").value;
+
+    let input = inputText;
+
+    if (functionName === "wasm_add") {
+
+        try {
+            input = JSON.parse(inputText);
+        } catch (error) {
+
+            document.getElementById("result").textContent =
+                "Untuk wasm_add gunakan JSON, contoh: {\"a\":10,\"b\":20}";
+
+            return;
+        }
+    }
+
+    document.getElementById("result").textContent =
+        "Executing...";
+
+    try {
+
+        const response = await fetch("/inference", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                function: functionName,
+                input: input
+            })
+
+        });
+
+        const data = await response.json();
+
+        document.getElementById("result").textContent =
+            JSON.stringify(data, null, 2);
+
+        loadHistory();
+
+    } catch (error) {
+
+        document.getElementById("result").textContent =
+            "Error: " + error;
+
+    }
+}
+
+
+async function loadHistory() {
+
+    try {
+
+        const response =
+            await fetch("/executions");
+
+        const data =
+            await response.json();
+
+        const historyElement =
+            document.getElementById("history");
+
+        if (data.executions.length === 0) {
+
+            historyElement.textContent =
+                "Belum ada execution.";
+
+            return;
+        }
+
+        historyElement.innerHTML =
+            data.executions
+                .slice()
+                .reverse()
+                .map(execution => `
+
+                    <div class="history-item">
+
+                        <div>
+                            <strong>
+                                ${execution.function}
+                            </strong>
+                        </div>
+
+                        <div>
+                            Status:
+                            <span class="${execution.status}">
+                                ${execution.status}
+                            </span>
+                        </div>
+
+                        <div>
+                            Execution Time:
+                            ${execution.execution_time_ms} ms
+                        </div>
+
+                        <div>
+                            ID:
+                            ${execution.execution_id}
+                        </div>
+
+                    </div>
+
+                `)
+                .join("");
+
+    } catch (error) {
+
+        document.getElementById("history").textContent =
+            "Gagal mengambil history.";
+
+    }
+}
+
+loadHistory();
+
+</script>
+
+</body>
+</html>

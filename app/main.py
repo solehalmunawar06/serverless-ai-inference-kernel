@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Any
 import time
@@ -19,6 +21,10 @@ app = FastAPI(
 )
 
 
+
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 class InferenceRequest(BaseModel):
     function: str
     input: Any
@@ -32,13 +38,9 @@ class InferenceResponse(BaseModel):
     status: str
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 def root():
-    return {
-        "system": "Serverless AI Inference Execution Kernel",
-        "status": "running",
-        "available_functions": list(ALL_FUNCTIONS.keys())
-    }
+    return FileResponse("app/static/index.html")
 
 
 @app.get("/health")
