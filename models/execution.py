@@ -48,6 +48,10 @@ class ExecutionKernel:
                 "status": "error",
             }
 
+        if function_name.startswith("wasm_"):
+            execution["runtime"] = "wasm"
+            execution["lifecycle"] = "load -> execute -> terminate"
+
         self.history.append(execution)
         return execution
 
