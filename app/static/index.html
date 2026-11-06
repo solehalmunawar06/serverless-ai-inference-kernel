@@ -8,53 +8,70 @@
     <style>
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
         }
 
         body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
             background: #f4f6f8;
-            color: #1f2937;
-            padding: 30px;
+            color: #17202a;
+        }
+
+        .header {
+            background: #111827;
+            color: white;
+            padding: 28px 40px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #cbd5e1;
         }
 
         .container {
-            max-width: 1000px;
-            margin: auto;
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
         }
 
-        h1 {
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: #6b7280;
-            margin-bottom: 25px;
+        .grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 20px;
         }
 
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 22px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 20px;
         }
 
         label {
             display: block;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin: 14px 0 7px;
         }
 
         select,
-        textarea,
-        button {
+        input,
+        textarea {
             width: 100%;
-            padding: 12px;
+            padding: 11px 12px;
+            border: 1px solid #cbd5e1;
             border-radius: 8px;
-            border: 1px solid #d1d5db;
-            margin-bottom: 15px;
+            font-size: 14px;
         }
 
         textarea {
@@ -62,12 +79,23 @@
             resize: vertical;
         }
 
+        .iris-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
         button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
             background: #2563eb;
             color: white;
-            border: none;
-            cursor: pointer;
+            font-size: 15px;
             font-weight: bold;
+            cursor: pointer;
         }
 
         button:hover {
@@ -75,127 +103,306 @@
         }
 
         .result {
-            background: #111827;
-            color: #e5e7eb;
-            padding: 15px;
-            border-radius: 8px;
-            white-space: pre-wrap;
+            margin-top: 18px;
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px;
             min-height: 100px;
-        }
-
-        .history-item {
-            border-left: 4px solid #2563eb;
-            background: #f9fafb;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: Consolas, monospace;
+            font-size: 13px;
         }
 
         .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 12px;
             font-weight: bold;
         }
 
-        .completed {
-            color: #16a34a;
+        .lifecycle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
-        .error {
-            color: #dc2626;
+        .step {
+            padding: 9px 13px;
+            background: #eef2ff;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .arrow {
+            color: #64748b;
+        }
+
+        .history {
+            margin-top: 20px;
+        }
+
+        .history-item {
+            border-top: 1px solid #e5e7eb;
+            padding: 14px 0;
+            font-size: 13px;
+        }
+
+        .history-item strong {
+            display: inline-block;
+            min-width: 90px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .architecture {
+            margin-top: 20px;
+        }
+
+        .architecture-box {
+            background: #111827;
+            color: white;
+            padding: 18px;
+            border-radius: 10px;
+            font-family: Consolas, monospace;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 800px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .iris-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                padding: 22px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<div class="container">
-
+<header class="header">
     <h1>Serverless AI Inference Execution Kernel</h1>
+    <p>Application-level OS architecture for fast and isolated AI inference execution</p>
+</header>
 
-    <p class="subtitle">
-        Application-level OS kernel for fast AI inference execution
-    </p>
+<main class="container">
 
-    <div class="card">
+    <div class="grid">
 
-        <h2>AI Inference</h2>
+        <!-- INFERENCE CONSOLE -->
+        <section class="card">
+            <h2>Inference Console</h2>
 
-        <br>
+            <label for="function">Inference Function</label>
 
-        <label for="function">Pilih Function</label>
+            <select id="function" onchange="changeFunction()">
+                <option value="echo">Echo</option>
+                <option value="uppercase">Uppercase</option>
+                <option value="wasm_add">WASM Add</option>
+                <option value="iris">Iris AI Classification</option>
+            </select>
 
-        <select id="function">
-            <option value="echo">Echo</option>
-            <option value="uppercase">Uppercase</option>
-            <option value="wasm_add">WASM Add</option>
-        </select>
+            <div id="normalInput">
+                <label for="input">Input</label>
+                <textarea id="input" placeholder="Masukkan input..."></textarea>
+            </div>
 
-        <label for="input">Input</label>
+            <div id="addInput" class="hidden">
+                <label>WASM Addition</label>
 
-        <textarea id="input">Halo Serverless AI</textarea>
+                <div class="iris-grid">
+                    <div>
+                        <label for="a">A</label>
+                        <input id="a" type="number" value="10">
+                    </div>
 
-        <button onclick="executeInference()">
-            Execute Inference
-        </button>
+                    <div>
+                        <label for="b">B</label>
+                        <input id="b" type="number" value="20">
+                    </div>
+                </div>
+            </div>
+
+            <div id="irisInput" class="hidden">
+                <label>Iris Measurements</label>
+
+                <div class="iris-grid">
+
+                    <div>
+                        <label for="sepal_length">Sepal Length</label>
+                        <input id="sepal_length" type="number" step="0.1" value="5.1">
+                    </div>
+
+                    <div>
+                        <label for="sepal_width">Sepal Width</label>
+                        <input id="sepal_width" type="number" step="0.1" value="3.5">
+                    </div>
+
+                    <div>
+                        <label for="petal_length">Petal Length</label>
+                        <input id="petal_length" type="number" step="0.1" value="1.4">
+                    </div>
+
+                    <div>
+                        <label for="petal_width">Petal Width</label>
+                        <input id="petal_width" type="number" step="0.1" value="0.2">
+                    </div>
+
+                </div>
+            </div>
+
+            <button onclick="executeInference()">
+                ⚡ Execute Inference
+            </button>
+
+            <div id="result" class="result">
+                Belum ada inference.
+            </div>
+        </section>
+
+
+        <!-- EXECUTION STATUS -->
+        <section class="card">
+
+            <h2>Execution Status</h2>
+
+            <p>
+                Status:
+                <span id="status" class="status">READY</span>
+            </p>
+
+            <div id="executionInfo">
+                <p>Execution ID: -</p>
+                <p>Runtime: -</p>
+                <p>Execution Time: -</p>
+            </div>
+
+            <h3>Lifecycle</h3>
+
+            <div class="lifecycle">
+                <div class="step">Load</div>
+                <div class="arrow">→</div>
+                <div class="step">Execute</div>
+                <div class="arrow">→</div>
+                <div class="step">Terminate</div>
+            </div>
+
+            <div class="architecture">
+                <h3>Runtime Architecture</h3>
+
+                <div class="architecture-box">
+USER
+  ↓
+WEB UI
+  ↓
+FastAPI
+  ↓
+Execution Kernel
+  ↓
+Wasmtime
+  ↓
+WASM Module
+  ↓
+AI Inference
+                </div>
+            </div>
+
+        </section>
 
     </div>
 
-    <div class="card">
 
-        <h2>Execution Result</h2>
-
-        <br>
-
-        <div id="result" class="result">
-            Belum ada execution.
-        </div>
-
-    </div>
-
-    <div class="card">
+    <!-- HISTORY -->
+    <section class="card history">
 
         <h2>Execution History</h2>
 
-        <br>
-
         <div id="history">
-            Belum ada history.
+            Belum ada execution history.
         </div>
 
-        <button onclick="loadHistory()">
-            Refresh History
-        </button>
+    </section>
 
-    </div>
+</main>
 
-</div>
 
 <script>
+
+function changeFunction() {
+
+    const selected = document.getElementById("function").value;
+
+    document.getElementById("normalInput").classList.add("hidden");
+    document.getElementById("addInput").classList.add("hidden");
+    document.getElementById("irisInput").classList.add("hidden");
+
+    if (selected === "wasm_add") {
+        document.getElementById("addInput").classList.remove("hidden");
+    }
+    else if (selected === "iris") {
+        document.getElementById("irisInput").classList.remove("hidden");
+    }
+    else {
+        document.getElementById("normalInput").classList.remove("hidden");
+    }
+}
+
 
 async function executeInference() {
 
     const functionName =
         document.getElementById("function").value;
 
-    const inputText =
-        document.getElementById("input").value;
-
-    let input = inputText;
+    let input;
 
     if (functionName === "wasm_add") {
 
-        try {
-            input = JSON.parse(inputText);
-        } catch (error) {
+        input = {
+            a: Number(document.getElementById("a").value),
+            b: Number(document.getElementById("b").value)
+        };
 
-            document.getElementById("result").textContent =
-                "Untuk wasm_add gunakan JSON, contoh: {\"a\":10,\"b\":20}";
+    }
+    else if (functionName === "iris") {
 
-            return;
-        }
+        input = {
+            sepal_length:
+                Number(document.getElementById("sepal_length").value),
+
+            sepal_width:
+                Number(document.getElementById("sepal_width").value),
+
+            petal_length:
+                Number(document.getElementById("petal_length").value),
+
+            petal_width:
+                Number(document.getElementById("petal_width").value)
+        };
+
+    }
+    else {
+
+        input =
+            document.getElementById("input").value;
     }
 
-    document.getElementById("result").textContent =
-        "Executing...";
+
+    document.getElementById("status").textContent =
+        "EXECUTING...";
 
     try {
 
@@ -214,17 +421,34 @@ async function executeInference() {
 
         });
 
+
         const data = await response.json();
 
+        document.getElementById("status").textContent =
+            data.status.toUpperCase();
+
+
+        document.getElementById("executionInfo").innerHTML = `
+            <p>Execution ID: ${data.execution_id}</p>
+            <p>Runtime: ${data.runtime || "-"}</p>
+            <p>Execution Time: ${data.execution_time_ms} ms</p>
+        `;
+
+
         document.getElementById("result").textContent =
-            JSON.stringify(data, null, 2);
+            JSON.stringify(data.result, null, 2);
+
 
         loadHistory();
 
-    } catch (error) {
+    }
+    catch (error) {
+
+        document.getElementById("status").textContent =
+            "ERROR";
 
         document.getElementById("result").textContent =
-            "Error: " + error;
+            error.toString();
 
     }
 }
@@ -240,46 +464,49 @@ async function loadHistory() {
         const data =
             await response.json();
 
-        const historyElement =
+        const history =
             document.getElementById("history");
 
-        if (data.executions.length === 0) {
+        if (!data.executions.length) {
 
-            historyElement.textContent =
-                "Belum ada execution.";
+            history.textContent =
+                "Belum ada execution history.";
 
             return;
         }
 
-        historyElement.innerHTML =
+
+        history.innerHTML =
             data.executions
                 .slice()
                 .reverse()
-                .map(execution => `
+                .map(item => `
 
                     <div class="history-item">
 
                         <div>
-                            <strong>
-                                ${execution.function}
-                            </strong>
+                            <strong>Function:</strong>
+                            ${item.function}
                         </div>
 
                         <div>
-                            Status:
-                            <span class="${execution.status}">
-                                ${execution.status}
-                            </span>
+                            <strong>Status:</strong>
+                            ${item.status}
                         </div>
 
                         <div>
-                            Execution Time:
-                            ${execution.execution_time_ms} ms
+                            <strong>Runtime:</strong>
+                            ${item.runtime || "-"}
                         </div>
 
                         <div>
-                            ID:
-                            ${execution.execution_id}
+                            <strong>Time:</strong>
+                            ${item.execution_time_ms} ms
+                        </div>
+
+                        <div>
+                            <strong>ID:</strong>
+                            ${item.execution_id}
                         </div>
 
                     </div>
@@ -287,14 +514,19 @@ async function loadHistory() {
                 `)
                 .join("");
 
-    } catch (error) {
+    }
+    catch (error) {
 
-        document.getElementById("history").textContent =
-            "Gagal mengambil history.";
+        console.error(
+            "History error:",
+            error
+        );
 
     }
 }
 
+
+changeFunction();
 loadHistory();
 
 </script>

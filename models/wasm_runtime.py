@@ -4,7 +4,7 @@ import wasmtime
 
 
 class WasmRuntime:
-    """Runtime untuk menjalankan fungsi AI WebAssembly menggunakan Wasmtime."""
+    """Runtime generik untuk menjalankan modul WebAssembly menggunakan Wasmtime."""
 
     SPECIES = {
         0: "Iris Setosa",
@@ -14,7 +14,9 @@ class WasmRuntime:
 
     def __init__(self, wasm_path: str):
         if not os.path.exists(wasm_path):
-            raise FileNotFoundError(f"WASM module tidak ditemukan: {wasm_path}")
+            raise FileNotFoundError(
+                f"WASM module tidak ditemukan: {wasm_path}"
+            )
 
         self.wasm_path = wasm_path
         self.engine = wasmtime.Engine()
@@ -22,6 +24,34 @@ class WasmRuntime:
             self.engine,
             self.wasm_path,
         )
+
+    def execute(self, function_name: str, *args):
+        """Menjalankan export function dari modul WASM."""
+        store = wasmtime.Store(self.engine)
+
+        instance = wasmtime.Instance(
+            store,
+            self.module,
+            [],
+        )
+
+        function = instance.exports(store)[function_name]
+
+        start = time.perf_counter()
+
+        result = function(store, *args)
+
+        execution_time_ms = (
+            time.perf_counter() - start
+        ) * 1000
+
+        return {
+            "result": int(result),
+            "execution_time_ms": round(
+                execution_time_ms,
+                4,
+            ),
+        }
 
     def classify(
         self,
@@ -42,17 +72,6 @@ class WasmRuntime:
         if any(value < 0 for value in values):
             raise ValueError("Nilai input tidak boleh negatif.")
 
-        store = wasmtime.Store(self.engine)
-
-        instance = wasmtime.Instance(
-            store,
-            self.module,
-            [],
-        )
-
-        classify_function = instance.exports(store)["classify"]
-
-        # Modul WASM menggunakan integer dengan skala x10.
         wasm_inputs = [
             round(sepal_length * 10),
             round(sepal_width * 10),
@@ -60,18 +79,12 @@ class WasmRuntime:
             round(petal_width * 10),
         ]
 
-        start = time.perf_counter()
-
-        prediction = classify_function(
-            store,
+        execution = self.execute(
+            "classify",
             *wasm_inputs,
         )
 
-        execution_time_ms = (
-            time.perf_counter() - start
-        ) * 1000
-
-        prediction = int(prediction)
+        prediction = execution["result"]
 
         return {
             "prediction": prediction,
@@ -86,8 +99,7 @@ class WasmRuntime:
                 "petal_width": petal_width,
             },
             "wasm_inputs": wasm_inputs,
-            "execution_time_ms": round(
-                execution_time_ms,
-                4,
-            ),
+            "execution_time_ms": execution[
+                "execution_time_ms"
+            ],
         }
